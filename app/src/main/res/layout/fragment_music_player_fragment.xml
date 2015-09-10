@@ -1,0 +1,108 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.music.personal.myapplication.MusicPlayerFragment"
+    android:background="@android:color/background_dark">
+
+    <ImageView
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:id="@+id/albumArt"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/dvd_disc1" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="New Text"
+        android:id="@+id/songName"
+        android:gravity="center"
+        android:textColor="#ffffff"
+        android:paddingTop="20dp"
+        android:textSize="18dp"
+        android:layout_below="@+id/albumArt"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="New Text"
+        android:id="@+id/albumName"
+        android:gravity="center"
+        android:textColor="@android:color/holo_orange_dark"
+        android:textSize="14dp"
+        android:layout_below="@+id/songName"
+        android:layout_alignParentStart="true" />
+
+    <SeekBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/seekBar"
+        android:layout_below="@+id/albumName"
+        android:layout_alignParentStart="true"
+        android:paddingTop="20dp" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/playPauseButton"
+        android:src="@android:drawable/ic_media_play"
+        android:layout_alignTop="@+id/previousButton"
+        android:layout_centerHorizontal="true"
+        android:paddingTop="30dp" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/previousButton"
+        android:src="@android:drawable/ic_media_previous"
+        android:focusableInTouchMode="false"
+        android:paddingTop="30dp"
+        android:layout_alignTop="@+id/currentPositionTxt"
+        android:layout_toStartOf="@+id/playPauseButton"
+        android:layout_marginEnd="37dp" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/nextButton"
+        android:src="@android:drawable/ic_media_next"
+        android:focusableInTouchMode="false"
+        android:paddingTop="30dp"
+        android:layout_marginStart="30dp"
+        android:layout_alignTop="@+id/playPauseButton"
+        android:layout_toEndOf="@+id/playPauseButton" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="0:00"
+        android:id="@+id/currentPositionTxt"
+        android:layout_below="@+id/seekBar"
+        android:layout_alignParentStart="true"
+        android:textColor="#ffffff" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="2:22"
+        android:id="@+id/maxDurationTxt"
+        android:layout_alignBottom="@+id/currentPositionTxt"
+        android:layout_alignParentEnd="true"
+        android:textColor="#ffffff" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/showPlayList"
+        android:src="@android:drawable/ic_menu_agenda"
+        android:focusableInTouchMode="false"
+        android:paddingTop="30dp"
+        android:layout_alignTop="@+id/nextButton"
+        android:layout_alignEnd="@+id/albumArt"
+        android:layout_marginEnd="18dp" />
+
+</RelativeLayout>

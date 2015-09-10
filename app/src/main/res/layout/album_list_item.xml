@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/background_dark">
+
+    <ImageView
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:id="@+id/albumArt"
+        android:src="@drawable/dvd_disc1"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_margin="3dp"
+        android:minHeight="64dp"
+        android:minWidth="64dp"
+        android:layout_weight="1"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:cropToPadding="false" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        tools:text="Thani Oruvan"
+        android:id="@+id/albumName"
+        android:layout_alignTop="@+id/albumArt"
+        android:layout_toEndOf="@+id/albumArt"
+        android:capitalize="words"
+        android:paddingLeft="8dp"
+        android:paddingRight="3dp"
+        android:textColor="@android:color/background_light"
+        android:layout_marginLeft="3dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        tools:text="AR Rahman"
+        android:id="@+id/musicDirector"
+        android:layout_below="@+id/albumName"
+        android:layout_alignStart="@+id/albumName"
+        android:paddingLeft="8dp"
+        android:paddingTop="2dp"
+        android:paddingRight="3dp"
+        android:textColor="@android:color/holo_orange_dark"/>
+
+</RelativeLayout>
