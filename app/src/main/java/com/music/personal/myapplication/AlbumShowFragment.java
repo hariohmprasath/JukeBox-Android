@@ -1,30 +1,32 @@
 package com.music.personal.myapplication;
 
 import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.music.personal.myapplication.adaptor.SongAdaptor;
+import com.music.personal.myapplication.persistance.CacheSongHelper;
+import com.music.personal.myapplication.persistance.impl.CacheSongHelperImpl;
 import com.music.personal.myapplication.pojo.Album;
 import com.music.personal.myapplication.pojo.Song;
 import com.music.personal.myapplication.utils.Constants;
+import com.music.personal.myapplication.utils.OfflineTask;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnCheckedChanged;
 
 
 /**
@@ -38,7 +40,8 @@ public class AlbumShowFragment extends Fragment {
 
     private View view;
     private Album album;
-    private SongSelectionListener songSelectionListener;
+    private CacheSongHelper helper;
+    private CacheSongHelperImpl service;
 
     @Bind(R.id.albumName)
     TextView albumName;
@@ -52,6 +55,8 @@ public class AlbumShowFragment extends Fragment {
     @Bind(R.id.songView)
     RecyclerView recyclerView;
 
+    Switch offlineSwitch;
+
     public static AlbumShowFragment newInstance(Album album) {
         AlbumShowFragment fragment = new AlbumShowFragment();
         fragment.setAlbum(album);
@@ -62,7 +67,6 @@ public class AlbumShowFragment extends Fragment {
     }
 
     public AlbumShowFragment() {
-        // Required empty public constructor
     }
 
     @Override
@@ -75,8 +79,10 @@ public class AlbumShowFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_album_show, container, false);
-        songSelectionListener = new SongSelectionListener();
         ButterKnife.bind(this, view);
+        this.helper = new CacheSongHelper(view.getContext());
+        this.service = new CacheSongHelperImpl();
+        this.offlineSwitch = (Switch) view.findViewById(R.id.offlineSwitch);
 
         Album album = getArguments().getParcelable("album");
         LinearLayoutManager linerLayoutManager = new LinearLayoutManager(view.getContext());
@@ -96,47 +102,50 @@ public class AlbumShowFragment extends Fragment {
                     x.setAlbumArt(album.getThumbNailUrl());
                 }
 
-                Song[] songArray = new Song[album.getListOfSongs().size()];
-                album.getListOfSongs().toArray(songArray);
-                SongAdaptor adaptor = new SongAdaptor(album.getListOfSongs());
+                List<Song> targetSongs = album.getListOfSongs();
+
+                // Get whether available in cache
+                List<Song> cacheSongs = service.getAllRecordsForAlbum(helper, album.getAlbumName());
+                if (cacheSongs != null && cacheSongs.size() > 0) {
+                    targetSongs = cacheSongs;
+                    offlineSwitch.setChecked(true);
+                }
+
+                Song[] songArray = new Song[targetSongs.size()];
+                targetSongs.toArray(songArray);
+
+                SongAdaptor adaptor = new SongAdaptor(targetSongs, getFragmentManager());
                 recyclerView.setLayoutManager(linerLayoutManager);
                 recyclerView.setAdapter(adaptor);
-                recyclerView.addOnItemTouchListener(songSelectionListener);
                 recyclerView.setItemAnimator(new DefaultItemAnimator());
+
+                // Set listener
+                offlineSwitch.setOnCheckedChangeListener(new OfflineSwitchListener(targetSongs));
             }
         }
 
         return view;
     }
 
-    class SongSelectionListener implements RecyclerView.OnItemTouchListener {
-        @Override
-        public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-            if (e.getAction() == MotionEvent.ACTION_DOWN) {
-                int selectedPosition = rv.getChildAdapterPosition(rv.findChildViewUnder(e.getX(), e.getY()));
-                List<Song> playList = new ArrayList<>();
-                for (int i = selectedPosition; i < getAlbum().getListOfSongs().size(); i++) {
-                    playList.add(getAlbum().getListOfSongs().get(i));
-                }
+    class OfflineSwitchListener implements CompoundButton.OnCheckedChangeListener {
+        private List<Song> listOfSongs;
 
-                Fragment fragment = MusicPlayerFragment.newInstance(playList);
-                FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                transaction.replace(R.id.container, fragment, Constants.MUSIC_PLAYER_FRAGMENT);
-                transaction.setCustomAnimations(R.anim.enter_to_right, R.anim.exit_to_left);
-                transaction.addToBackStack(Constants.MUSIC_PLAYER_STACK);
-                transaction.commit();
-            }
-            return true;
+        public OfflineSwitchListener(List<Song> listOfSongs) {
+            this.listOfSongs = listOfSongs;
         }
 
         @Override
-        public void onTouchEvent(RecyclerView rv, MotionEvent e) {
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            Song[] params = new Song[listOfSongs.size()];
+            listOfSongs.toArray(params);
+            OfflineTask offlineTask = null;
 
-        }
+            if (isChecked)
+                offlineTask = new OfflineTask(view.getContext(), true);
+            else
+                offlineTask = new OfflineTask(view.getContext(), false);
 
-        @Override
-        public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-
+            offlineTask.execute(params);
         }
     }
 

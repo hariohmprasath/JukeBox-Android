@@ -71,7 +71,7 @@ public class NavigationDrawerFragment extends Fragment {
         // Read in the flag indicating whether or not the user has demonstrated awareness of the
         // drawer. See PREF_USER_LEARNED_DRAWER for details.
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        mUserLearnedDrawer = sp.getBoolean(PREF_USER_LEARNED_DRAWER, false);
+        mUserLearnedDrawer = sp.getBoolean(PREF_USER_LEARNED_DRAWER, true);
 
         if (savedInstanceState != null) {
             mCurrentSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
@@ -105,7 +105,8 @@ public class NavigationDrawerFragment extends Fragment {
                 android.R.layout.simple_list_item_activated_1,
                 android.R.id.text1,
                 new String[]{
-                        getString(R.string.title_albums)
+                        getString(R.string.title_albums),
+                        "Playlist"
                 }));
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
         return mDrawerListView;
@@ -251,10 +252,10 @@ public class NavigationDrawerFragment extends Fragment {
         if (item.getItemId() == R.id.action_example) {
             Fragment musicFragment = getFragmentManager().findFragmentByTag(Constants.MUSIC_PLAYER_FRAGMENT);
             if (musicFragment == null)
-                musicFragment = MusicPlayerFragment.newInstance(null);
+                musicFragment = MusicPlayerFragment.newInstance();
+
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
             transaction.replace(R.id.container, musicFragment, Constants.MUSIC_PLAYER_FRAGMENT);
-            transaction.addToBackStack(null);
             transaction.commit();
 
             return true;
@@ -268,7 +269,7 @@ public class NavigationDrawerFragment extends Fragment {
     }
 
     /**
-     * Callbacks interface that all activities using this fragment must implement.
+     * Callbacks interfaces that all activities using this fragment must implement.
      */
     public static interface NavigationDrawerCallbacks {
         /**

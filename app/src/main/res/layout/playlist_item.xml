@@ -2,18 +2,18 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/background_dark"
-    android:paddingBottom="5dp">
+    android:background="@android:color/background_dark">
 
     <View
         android:id="@+id/lineView"
         android:layout_width="match_parent"
         android:layout_height="2px"
-        android:background="@android:color/holo_orange_dark"/>
+        android:background="#2ca9e7"/>
 
     <ImageView
         android:layout_width="50dp"
         android:layout_height="50dp"
+        android:paddingTop="5dp"
         android:id="@+id/albumArt" />
 
     <TextView
@@ -34,5 +34,5 @@
         android:id="@+id/albumName"
         android:layout_below="@+id/songName"
         android:layout_toEndOf="@+id/albumArt"
-        android:textColor="@android:color/holo_orange_dark" />
+        android:textColor="#2ca9e7" />
 </RelativeLayout>

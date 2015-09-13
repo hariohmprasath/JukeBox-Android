@@ -49,8 +49,12 @@ public class HomeActivity extends Activity
         switch (position) {
             default:
             case 0:
-                fragment = AlbumListFragment.newInstance(fragmentManager);
+                fragment = AlbumListFragment.newInstance(false);
                 title = "All Albums";
+                break;
+            case 1:
+                fragment = AlbumListFragment.newInstance(true);
+                title = "All Playlist";
                 break;
         }
 

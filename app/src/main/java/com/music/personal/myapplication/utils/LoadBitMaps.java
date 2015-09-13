@@ -104,7 +104,7 @@ public class LoadBitMaps extends AsyncTask<String, Void, Void> {
                     mBuilder.addAction(android.R.drawable.ic_media_next, "", pendingNext);
 
 
-                    BroadcastReceiver receiver = new BroadcastReceiver() {
+                    final BroadcastReceiver receiver = new BroadcastReceiver() {
                         @Override
                         public void onReceive(Context context, Intent intent) {
                             String action = intent.getAction();
@@ -120,6 +120,8 @@ public class LoadBitMaps extends AsyncTask<String, Void, Void> {
                                 case PREVIOUS:
                                     if (playerFragment != null)
                                         playerFragment.playPreviousTrack();
+
+                                    unRegisterReceiver(activity, this);
                                     break;
                                 case PLAY_OR_PAUSE:
                                     if (player != null) {
@@ -128,10 +130,14 @@ public class LoadBitMaps extends AsyncTask<String, Void, Void> {
                                         else
                                             player.start();
                                     }
+
+                                    unRegisterReceiver(activity, this);
                                     break;
                                 case NEXT:
                                     if (playerFragment != null)
                                         playerFragment.playNextTrack();
+
+                                    unRegisterReceiver(activity, this);
                                     break;
                             }
                         }
@@ -141,6 +147,8 @@ public class LoadBitMaps extends AsyncTask<String, Void, Void> {
                     activity.registerReceiver(receiver, playFilter);
                     activity.registerReceiver(receiver, previousFilter);
                     activity.registerReceiver(receiver, nextFilter);
+
+
                     //Display notification
                     notificationManager.notify(-999, mBuilder.build());
                 }
@@ -151,6 +159,11 @@ public class LoadBitMaps extends AsyncTask<String, Void, Void> {
 
         }
         return null;
+    }
+
+    private void unRegisterReceiver(Activity activity, BroadcastReceiver receiver) {
+        if (activity != null && receiver != null)
+            activity.unregisterReceiver(receiver);
     }
 
 

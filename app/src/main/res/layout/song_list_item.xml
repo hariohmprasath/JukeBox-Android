@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingTop="10dp">
+    android:layout_height="match_parent">
 
     <View
         android:id="@+id/lineView"
         android:layout_width="match_parent"
         android:layout_height="2px"
-        android:background="@android:color/holo_orange_dark"/>
+        android:background="#2ca9e7"/>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/songName"
+        android:paddingTop="15dp"
         android:textSize="15dp"
         android:textStyle="normal"
-        android:paddingBottom="5dp"
         android:textColor="#ffffff" />
 </LinearLayout>

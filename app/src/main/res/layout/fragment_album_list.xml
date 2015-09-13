@@ -9,6 +9,10 @@
         android:layout_height="fill_parent"
         android:background="@android:color/background_dark">
 
+        <LinearLayout
+            android:focusable="true" android:focusableInTouchMode="true"
+            android:layout_width="0px" android:layout_height="0px"/>
+
         <EditText
             android:id="@+id/searchText"
             android:layout_width="match_parent"
@@ -16,8 +20,8 @@
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
             android:hint="Filter your albums"
-            android:textColor="@android:color/holo_orange_dark"
-            android:textColorHint="@android:color/holo_orange_dark" />
+            android:textColor="#2ca9e7"
+            android:textColorHint="#2ca9e7" />
 
         <android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:tools="http://schemas.android.com/tools"
@@ -28,6 +32,6 @@
             android:layout_below="@+id/searchText"
             android:background="@android:color/transparent"
             android:divider="@android:color/transparent"
-            android:textColorHint="#22998a" />
+            android:textColorHint="#2ca9e7" />
     </RelativeLayout>
 </FrameLayout>

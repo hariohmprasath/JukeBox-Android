@@ -67,7 +67,7 @@ public class PlayListFragment extends Fragment {
         view = inflater.inflate(R.layout.fragment_play_list, container, false);
         ButterKnife.bind(this, view);
 
-        PlayListAdaptor adaptor = new PlayListAdaptor(playList, view.getContext(), currentSongPosition);
+        PlayListAdaptor adaptor = new PlayListAdaptor(playList, view.getContext(), currentSongPosition, getFragmentManager());
         LinearLayoutManager layoutManager = new LinearLayoutManager(view.getContext());
         playListView.setAdapter(adaptor);
         playListView.setLayoutManager(layoutManager);
@@ -75,32 +75,6 @@ public class PlayListFragment extends Fragment {
         ItemTouchHelper.Callback callback = new SimpleItemTouchHolderCallback(adaptor);
         ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
         touchHelper.attachToRecyclerView(playListView);
-
-        playListView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
-            @Override
-            public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-                if (e.getAction() == MotionEvent.ACTION_DOWN) {
-                    int selectedPosition = rv.getChildAdapterPosition(rv.findChildViewUnder(e.getX(), e.getY()));
-                    FragmentManager fragmentManager = getFragmentManager();
-                    Fragment fragment = fragmentManager.findFragmentByTag(Constants.MUSIC_PLAYER_FRAGMENT);
-                    if (fragment != null) {
-                        ((MusicPlayerFragment) fragment).playFromPlaylist(selectedPosition);
-                        fragmentManager.popBackStack();
-                    }
-                }
-                return true;
-            }
-
-            @Override
-            public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-
-            }
-
-            @Override
-            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-
-            }
-        });
 
         return view;
     }

@@ -2,17 +2,11 @@ package com.music.personal.myapplication;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
-import android.app.NotificationManager;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.NotificationCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,9 +21,7 @@ import com.music.personal.myapplication.utils.LoadBitMaps;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URLEncoder;
 import java.util.List;
 
 import butterknife.Bind;
@@ -49,6 +41,7 @@ public class MusicPlayerFragment extends Fragment {
     private static List<Song> playlist;
     private static MediaPlayer mediaPlayer;
     private static int currentSongPosition = 0;
+    private static boolean isInitialized = true;
 
     private View view;
     private Handler handler;
@@ -81,14 +74,10 @@ public class MusicPlayerFragment extends Fragment {
     TextView maxDurationTxt;
 
 
-    public static MusicPlayerFragment newInstance(List<Song> playlist) {
+    public static MusicPlayerFragment newInstance() {
         MusicPlayerFragment fragment = new MusicPlayerFragment();
-        if (playlist != null) {
-            MusicPlayerFragment.currentSongPosition = 0;
-            MusicPlayerFragment.playlist = playlist;
-            Bundle args = new Bundle();
-            fragment.setArguments(args);
-        }
+        Bundle args = new Bundle();
+        fragment.setArguments(args);
         return fragment;
     }
 
@@ -109,24 +98,24 @@ public class MusicPlayerFragment extends Fragment {
             view = inflater.inflate(R.layout.fragment_music_player_fragment, container, false);
             ButterKnife.bind(this, view);
 
+            // First time initialization of media player
             if (mediaPlayer == null) {
                 mediaPlayer = new MediaPlayer();
                 mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            }
+
+            // Re-initialize it in case of new song is selected from album/playlist
+            if (isInitialized) {
+                resetMedia();
                 prepareMediaPlayer();
-                updateCounter(true);
+                setPauseIcon();
             } else {
-                Song x = playlist.get(currentSongPosition);
-                String imageSource = x.getAlbumArt();
-                if (imageSource == null)
-                    imageSource = Constants.DEFAULT_IMAGE_URL;
-                Picasso.with(view.getContext()).load(imageSource).into(albumArt);
-                albumName.setText(x.getAlbumName());
-                songName.setText(x.getSongName());
-                seekBar.setMax(mediaPlayer.getDuration());
-                maxDurationTxt.setText(getDurationTxt(mediaPlayer.getDuration()));
+                setTrack();
+                setMaxDuration();
                 toggleIcon();
             }
 
+            // Thread to update seek bar, current position timing every 1 second
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -137,7 +126,11 @@ public class MusicPlayerFragment extends Fragment {
                 }
             });
 
+            // Add seek bar listener
             addSeekBarListener();
+
+            // Reset initialization flag
+            MusicPlayerFragment.isInitialized = false;
 
             return view;
         } catch (Exception e) {
@@ -146,6 +139,27 @@ public class MusicPlayerFragment extends Fragment {
         return null;
     }
 
+    public void initializePlayer(List<Song> playlist, int currentSongPosition) {
+        if (playlist != null) {
+            MusicPlayerFragment.playlist = playlist;
+            MusicPlayerFragment.currentSongPosition = currentSongPosition;
+            MusicPlayerFragment.isInitialized = true;
+        }
+    }
+
+    public void initializePlayer(int currentSongPosition) {
+        MusicPlayerFragment.currentSongPosition = currentSongPosition;
+        MusicPlayerFragment.isInitialized = true;
+    }
+
+    public void syncPlaylist(List<Song> playlist) {
+        if (playlist != null)
+            MusicPlayerFragment.playlist = playlist;
+    }
+
+    /**
+     * Seek bar listener
+     */
     private void addSeekBarListener() {
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -160,16 +174,21 @@ public class MusicPlayerFragment extends Fragment {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
+                // Don't do anything
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
+                // Don't do anything
             }
         });
     }
 
+    /**
+     * 1. Set albumArt, songName, albumName and send notification
+     * 2. Set seekBar max duration & max duration text
+     * 3. Prepare async sync and start playing
+     */
     private void prepareMediaPlayer() {
         try {
             setTrack();
@@ -177,15 +196,22 @@ public class MusicPlayerFragment extends Fragment {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
                     mp.start();
-                    seekBar.setMax(mediaPlayer.getDuration());
-                    maxDurationTxt.setText(getDurationTxt(mediaPlayer.getDuration()));
+                    setMaxDuration();
                 }
             });
-            mediaPlayer.prepareAsync();
+
+            if (playlist != null && playlist.size() > 0)
+                mediaPlayer.prepareAsync();
+
             play();
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void setMaxDuration() {
+        seekBar.setMax(mediaPlayer.getDuration());
+        maxDurationTxt.setText(getDurationTxt(mediaPlayer.getDuration()));
     }
 
     @OnClick(R.id.playPauseButton)
@@ -198,29 +224,39 @@ public class MusicPlayerFragment extends Fragment {
 
     private void pause() {
         mediaPlayer.pause();
-        playPauseButton.setImageDrawable(getResources().getDrawable(android.R.drawable.ic_media_play));
+        setPlayIcon();
     }
 
     private void play() {
         if (!mediaPlayer.isPlaying())
             mediaPlayer.start();
-        playPauseButton.setImageDrawable(getResources().getDrawable(android.R.drawable.ic_media_pause));
+        setPauseIcon();
     }
 
     private void toggleIcon() {
         if (mediaPlayer.isPlaying())
-            playPauseButton.setImageDrawable(getResources().getDrawable(android.R.drawable.ic_media_pause));
+            setPauseIcon();
         else
-            playPauseButton.setImageDrawable(getResources().getDrawable(android.R.drawable.ic_media_play));
+            setPlayIcon();
+    }
+
+    private void setPlayIcon() {
+        playPauseButton.setImageDrawable(getResources().getDrawable(android.R.drawable.ic_media_play));
+    }
+
+    private void setPauseIcon() {
+        playPauseButton.setImageDrawable(getResources().getDrawable(android.R.drawable.ic_media_pause));
     }
 
     @OnClick(R.id.nextButton)
     public void playNextTrack() {
         try {
+            MusicPlayerFragment.isInitialized = true;
+            updateCounter(true);
             resetMedia();
             prepareMediaPlayer();
             play();
-            updateCounter(true);
+            MusicPlayerFragment.isInitialized = false;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -230,10 +266,12 @@ public class MusicPlayerFragment extends Fragment {
     @OnClick(R.id.previousButton)
     public void playPreviousTrack() {
         try {
+            MusicPlayerFragment.isInitialized = true;
             resetMedia();
-            updateCounter(false);
             prepareMediaPlayer();
+            updateCounter(false);
             play();
+            MusicPlayerFragment.isInitialized = false;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -249,10 +287,25 @@ public class MusicPlayerFragment extends Fragment {
         transaction.commit();
     }
 
+    /**
+     * Set AlbumArt, songName, albumName & send notification
+     * Set the track to media player only in-case of re-initialization needed.
+     *
+     * @throws IOException
+     */
     private void setTrack() throws IOException {
         if (playlist != null && currentSongPosition < playlist.size()) {
-            final Song x = playlist.get(currentSongPosition);
-            mediaPlayer.setDataSource(x.getSongUrl());
+            Song x = playlist.get(currentSongPosition);
+
+            String mediaUrl = x.getSongUrl();
+            mediaUrl = mediaUrl.replaceAll("\\s", "%20");
+            if (x.getCacheLocation() != null && x.getCacheLocation().trim().length() > 0)
+                mediaUrl = x.getCacheLocation();
+
+            if (MusicPlayerFragment.isInitialized)
+                mediaPlayer.setDataSource(mediaUrl);
+
+
             String imageSource = x.getAlbumArt();
             if (imageSource == null)
                 imageSource = Constants.DEFAULT_IMAGE_URL;
@@ -261,27 +314,21 @@ public class MusicPlayerFragment extends Fragment {
             albumName.setText(x.getAlbumName());
             songName.setText(x.getSongName());
 
+            // Send notification to android action bar
             new LoadBitMaps(view.getContext(), getActivity(), x).execute(imageSource);
-        } else
+        } else if (playlist != null && playlist.size() != 0)
             Toast.makeText(getActivity(), "Reached end of the list", Toast.LENGTH_SHORT).show();
     }
 
-    public void playFromPlaylist(int currentSongPosition) {
-        try {
-            MusicPlayerFragment.currentSongPosition = (currentSongPosition - 1);
-            resetMedia();
-            prepareMediaPlayer();
-            play();
-            updateCounter(true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     private void resetMedia() {
-        mediaPlayer.reset();
-        seekBar.setProgress(0);
-        seekBar.setMax(999999999);
+        if (mediaPlayer != null)
+            mediaPlayer.reset();
+
+        if (seekBar != null) {
+            seekBar.setProgress(0);
+            seekBar.setMax(999999999);
+        }
+
     }
 
     private void updateCounter(boolean isIncrement) {

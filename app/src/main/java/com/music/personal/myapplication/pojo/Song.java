@@ -11,6 +11,8 @@ public class Song implements Parcelable {
     private String songUrl;
     private String albumArt;
     private String albumName;
+    private String cacheLocation;
+    private String cachedOn;
 
     public String getSongName() {
         return songName;
@@ -76,4 +78,25 @@ public class Song implements Parcelable {
             return new Song[size];
         }
     };
+
+    @Override
+    public String toString() {
+        return this.getAlbumName()+"--"+this.getSongName();
+    }
+
+    public String getCacheLocation() {
+        return cacheLocation;
+    }
+
+    public void setCacheLocation(String cacheLocation) {
+        this.cacheLocation = cacheLocation;
+    }
+
+    public String getCachedOn() {
+        return cachedOn;
+    }
+
+    public void setCachedOn(String cachedOn) {
+        this.cachedOn = cachedOn;
+    }
 }

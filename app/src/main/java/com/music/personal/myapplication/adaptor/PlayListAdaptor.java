@@ -1,5 +1,7 @@
 package com.music.personal.myapplication.adaptor;
 
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.graphics.Paint;
 import android.graphics.Typeface;
@@ -10,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.music.personal.myapplication.MusicPlayerFragment;
 import com.music.personal.myapplication.R;
 import com.music.personal.myapplication.adaptor.interfaces.ItemTouchHelperAdapter;
 import com.music.personal.myapplication.pojo.Song;
@@ -27,12 +30,15 @@ public class PlayListAdaptor extends RecyclerView.Adapter<PlayListAdaptor.SongVi
     private List<Song> songList;
     private Context context;
     private int currentSongPosition;
+    private FragmentManager fragmentManager;
 
-    public PlayListAdaptor(List<Song> songList, Context context, int currentSongPosition) {
+    public PlayListAdaptor(List<Song> songList, Context context,
+                           int currentSongPosition, FragmentManager fragmentManager) {
         super();
         this.songList = songList;
         this.context = context;
         this.currentSongPosition = currentSongPosition;
+        this.fragmentManager = fragmentManager;
     }
 
     @Override
@@ -64,23 +70,36 @@ public class PlayListAdaptor extends RecyclerView.Adapter<PlayListAdaptor.SongVi
     @Override
     public SongViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.playlist_item, null);
-        return new SongViewHolder(view);
+        return new SongViewHolder(view, fragmentManager);
     }
 
-    public static class SongViewHolder extends RecyclerView.ViewHolder {
+    public static class SongViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private TextView songName;
         private TextView albumName;
         private ImageView thumbNail;
         private View viewLine;
+        private FragmentManager fragmentManager;
 
-        public SongViewHolder(View itemView) {
+        public SongViewHolder(View itemView, FragmentManager fragmentManager) {
             super(itemView);
 
+            this.fragmentManager = fragmentManager;
             this.songName = (TextView) itemView.findViewById(R.id.songName);
             this.albumName = (TextView) itemView.findViewById(R.id.albumName);
             this.thumbNail = (ImageView) itemView.findViewById(R.id.albumArt);
             this.viewLine = itemView.findViewById(R.id.lineView);
+            itemView.setOnClickListener(this);
+        }
 
+        @Override
+        public void onClick(View v) {
+            int selectedPosition = getLayoutPosition();
+            FragmentManager fragmentManager = this.fragmentManager;
+            Fragment fragment = fragmentManager.findFragmentByTag(Constants.MUSIC_PLAYER_FRAGMENT);
+            if (fragment != null) {
+                ((MusicPlayerFragment) fragment).initializePlayer(selectedPosition);
+                fragmentManager.popBackStack();
+            }
         }
     }
 
@@ -88,6 +107,7 @@ public class PlayListAdaptor extends RecyclerView.Adapter<PlayListAdaptor.SongVi
     public void onItemDismiss(int position) {
         songList.remove(position);
         notifyItemRemoved(position);
+        syncPlayList();
     }
 
     @Override
@@ -102,5 +122,12 @@ public class PlayListAdaptor extends RecyclerView.Adapter<PlayListAdaptor.SongVi
             }
         }
         notifyItemMoved(fromPosition, toPosition);
+        syncPlayList();
+    }
+
+    private void syncPlayList() {
+        Fragment fragment = fragmentManager.findFragmentByTag(Constants.MUSIC_PLAYER_FRAGMENT);
+        if (fragment != null)
+            ((MusicPlayerFragment) fragment).syncPlaylist(songList);
     }
 }

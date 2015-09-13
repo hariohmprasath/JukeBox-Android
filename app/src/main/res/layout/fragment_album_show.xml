@@ -18,6 +18,18 @@
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true" />
 
+        <Switch
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Save Offline  "
+            android:id="@+id/offlineSwitch"
+            android:layout_below="@+id/albumArtThumbNail"
+            android:layout_alignStart="@+id/albumArtThumbNail"
+            android:layout_marginStart="30dp"
+            android:paddingTop="3dp"
+            android:textColor="#ffffff"
+            android:textStyle="bold" />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -27,7 +39,7 @@
             android:paddingTop="4dp"
             android:textSize="22dp"
             android:textColor="@android:color/background_light"
-            android:layout_below="@+id/albumArtThumbNail"
+            android:layout_below="@+id/offlineSwitch"
             android:layout_alignParentStart="true"
             android:gravity="center" />
 
@@ -39,7 +51,7 @@
             android:paddingTop="1dp"
             android:paddingLeft="3dp"
             android:textSize="16dp"
-            android:textColor="@android:color/holo_orange_dark"
+            android:textColor="#2ca9e7"
             android:layout_below="@+id/albumName"
             android:layout_alignParentEnd="true"
             android:gravity="center"
@@ -55,6 +67,8 @@
             android:layout_below="@+id/musicDirector"
             android:layout_alignParentStart="true"
             android:layout_marginTop="15dp" />
+
+
 
     </RelativeLayout>
 

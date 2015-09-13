@@ -45,6 +45,14 @@
         android:paddingLeft="8dp"
         android:paddingTop="2dp"
         android:paddingRight="3dp"
-        android:textColor="@android:color/holo_orange_dark"/>
+        android:textColor="#2ca9e7"/>
+
+    <ImageView
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/offlineIcon"
+        android:layout_below="@+id/musicDirector"
+        android:layout_alignStart="@+id/musicDirector"
+        android:paddingLeft="3dp" />
 
 </RelativeLayout>
